@@ -1,0 +1,23 @@
+services:
+  # ── Backend (Express) ──────────────────────────────────────────────────────
+  - type: web
+    name: placeit-backend
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+    plan: free
+
+  # ── AI Service (FastAPI) ───────────────────────────────────────────────────
+  - type: web
+    name: placeit-ai
+    runtime: python
+    rootDir: ai-service
+    buildCommand: pip install -r requirements.txt && python model/train.py
+    startCommand: uvicorn main:app --host 0.0.0.0 --port 10000
+    plan: free
