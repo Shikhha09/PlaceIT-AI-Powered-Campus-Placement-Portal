@@ -1,0 +1,58 @@
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Environment files - NEVER commit these
+.env
+backend/.env
+frontend/.env
+ai-service/.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyc
+.venv/
+venv/
+ai-service/.venv/
+ai-service/__pycache__/
+*.egg-info/
+dist/
+build/
+
+# Local uploads (use Supabase in production)
+backend/uploads/
+
+# Build outputs
+frontend/dist/
+frontend/.vite/
+
+# IDE
+.vscode/settings.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+logs/
+
+# Testing
+coverage/
+.nyc_output/
+
+# Docker
+.docker/
+
+# Misc
+*.zip
+*.tar.gz
