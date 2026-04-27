@@ -26,17 +26,27 @@ export default function AdminAnalytics() {
   const handleExport = async (filename) => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`/api/admin/export/${filename}`, {
+      // Use VITE_API_URL so this works on Vercel (not just localhost)
+      const baseUrl = import.meta.env.VITE_API_URL || "/api";
+      const res = await fetch(`${baseUrl}/admin/export/${filename}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) throw new Error("Export failed");
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || `Server returned ${res.status}`);
+      }
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
-      a.href = url; a.download = filename;
-      document.body.appendChild(a); a.click(); a.remove();
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
       URL.revokeObjectURL(url);
-    } catch (err) { alert("Export failed: " + err.message); }
+    } catch (err) {
+      alert("Export failed: " + err.message);
+    }
   };
   if (loading) return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
