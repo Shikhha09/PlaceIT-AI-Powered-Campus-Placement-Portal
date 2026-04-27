@@ -22,6 +22,22 @@ export default function AdminAnalytics() {
       .finally(() => setLoading(false));
   }, []);
 
+
+  const handleExport = async (filename) => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`/api/admin/export/${filename}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("Export failed");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = filename;
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) { alert("Export failed: " + err.message); }
+  };
   if (loading) return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       <Navbar />
@@ -77,13 +93,13 @@ export default function AdminAnalytics() {
           </div>
           <div className="flex gap-2">
             <button
-              onClick={() => window.open("/api/admin/export/applications.csv","_blank")}
+              onClick={() => handleExport("applications.csv")}
               className="btn-secondary text-sm flex items-center gap-2"
             >
               <Download size={14} /> Applications CSV
             </button>
             <button
-              onClick={() => window.open("/api/admin/export/activity-logs.csv","_blank")}
+              onClick={() => handleExport("activity-logs.csv")}
               className="btn-secondary text-sm flex items-center gap-2"
             >
               <Download size={14} /> Audit Logs CSV
