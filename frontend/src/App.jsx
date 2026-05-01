@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
 
 // Pages
+import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ProtectedRoute from "./routes/ProtectedRoute";
@@ -40,7 +41,8 @@ export default function App() {
       {/* Public */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
-      <Route path="/" element={<RoleRedirect />} />
+      <Route path="/" element={<Landing />} />
+      <Route path="/app" element={<RoleRedirect />} />
 
       {/* Student routes */}
       <Route element={<ProtectedRoute allowedRoles={["student"]} />}>
