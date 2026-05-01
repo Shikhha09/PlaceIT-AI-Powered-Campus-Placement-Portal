@@ -108,12 +108,48 @@ export default function Login() {
             </Link>
           </p>
 
-          {/* Demo credentials */}
-          <div className="mt-5 p-4 bg-gray-50 dark:bg-gray-800/60 rounded-xl text-xs text-gray-500 dark:text-gray-400 space-y-1.5 border border-gray-100 dark:border-gray-700/40">
-            <p className="font-semibold text-gray-600 dark:text-gray-300 mb-2">🔑 Demo accounts:</p>
-            <p><span className="font-medium text-purple-600 dark:text-purple-400">Admin:</span> admin@campus.local / Password@123</p>
-            <p><span className="font-medium text-blue-600 dark:text-blue-400">Company:</span> hr@technova.com / Password@123</p>
-            <p><span className="font-medium text-green-600 dark:text-green-400">Student:</span> aarav@student.edu / Password@123</p>
+          {/* Demo Access - One click login */}
+          <div className="mt-5 border border-dashed border-gray-200 dark:border-gray-700 rounded-xl p-4">
+            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 text-center mb-3 uppercase tracking-wide">
+              ⚡ Quick Demo Access
+            </p>
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                type="button"
+                onClick={() => onSubmit({ email: "admin@campus.local", password: "Password@123" })}
+                className="flex flex-col items-center gap-1 p-2.5 rounded-lg border border-purple-200 dark:border-purple-800/50
+                           bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/40
+                           transition-colors cursor-pointer"
+              >
+                <span className="text-lg">👨‍💼</span>
+                <span className="text-xs font-semibold text-purple-700 dark:text-purple-400">Admin</span>
+                <span className="text-xs text-purple-500 dark:text-purple-500">TPO View</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => onSubmit({ email: "hr@technova.com", password: "Password@123" })}
+                className="flex flex-col items-center gap-1 p-2.5 rounded-lg border border-blue-200 dark:border-blue-800/50
+                           bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40
+                           transition-colors cursor-pointer"
+              >
+                <span className="text-lg">🏢</span>
+                <span className="text-xs font-semibold text-blue-700 dark:text-blue-400">Company</span>
+                <span className="text-xs text-blue-500 dark:text-blue-500">HR View</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => onSubmit({ email: "aarav@student.edu", password: "Password@123" })}
+                className="flex flex-col items-center gap-1 p-2.5 rounded-lg border border-green-200 dark:border-green-800/50
+                           bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/40
+                           transition-colors cursor-pointer"
+              >
+                <span className="text-lg">🎓</span>
+                <span className="text-xs font-semibold text-green-700 dark:text-green-400">Student</span>
+                <span className="text-xs text-green-500 dark:text-green-500">Student View</span>
+              </button>
+            </div>
           </div>
         </div>
 
