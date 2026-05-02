@@ -38,7 +38,7 @@ export default function Login() {
                     dark:from-gray-950 dark:via-gray-900 dark:to-gray-950
                     flex items-center justify-center p-4 transition-colors">
 
-      {/* Theme toggle — top right */}
+      {/* Theme toggle */}
       <button
         onClick={toggleTheme}
         className="fixed top-4 right-4 p-2 rounded-lg bg-white/20 dark:bg-gray-700/60
@@ -84,9 +84,17 @@ export default function Login() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Password
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Password
+                </label>
+                <Link
+                  to="/forgot-password"
+                  className="text-xs text-primary-600 dark:text-primary-400 hover:underline font-medium"
+                >
+                  Forgot password?
+                </Link>
+              </div>
               <input
                 {...register("password", { required: "Password is required" })}
                 type="password"
@@ -108,7 +116,7 @@ export default function Login() {
             </Link>
           </p>
 
-          {/* Demo Access - One click login */}
+          {/* Demo Access */}
           <div className="mt-5 border border-dashed border-gray-200 dark:border-gray-700 rounded-xl p-4">
             <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 text-center mb-3 uppercase tracking-wide">
               ⚡ Quick Demo Access

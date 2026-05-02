@@ -15,16 +15,41 @@ router.post("/register", async (req, res) => {
     return res.status(400).json({ error: "Role must be student or company." });
   }
 
+  const crypto = require("crypto");
+  const verifyToken = crypto.randomBytes(32).toString("hex");
+
   const user = await User.create({
     name, email, password, role,
+    emailVerified: false,
+    emailVerifyToken: verifyToken,
     ...(role === "student" && { branch, cgpa, graduationYear }),
     ...(role === "company" && { companyName, industry }),
+  });
+
+  // Send verification email
+  const verifyUrl = `${process.env.CLIENT_URL}/verify-email/${verifyToken}`;
+  const { sendEmail } = require("../services/emailService");
+  await sendEmail({
+    to: user.email,
+    subject: "Verify your PlaceIT email",
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;padding:24px;background:#f9f9f9;border-radius:8px">
+        <h2 style="color:#2563eb">Verify Your Email ✅</h2>
+        <p>Hi <strong>${user.name}</strong>, welcome to PlaceIT!</p>
+        <p>Click the button below to verify your email address. This link expires in <strong>24 hours</strong>.</p>
+        <a href="${verifyUrl}" style="display:inline-block;margin:16px 0;padding:12px 24px;background:#2563eb;color:white;border-radius:8px;text-decoration:none;font-weight:bold;">
+          Verify Email
+        </a>
+        <p style="color:#888;font-size:12px">After verifying, your account will be reviewed by the admin for approval.</p>
+        <hr/>
+        <small style="color:#888">PlaceIT — AI-Powered Campus Placement Portal</small>
+      </div>`,
   });
 
   await log({ actor: user._id, actorRole: role, action: "USER_REGISTERED", entity: "User", entityId: user._id });
 
   res.status(201).json({
-    message: "Registration successful. Awaiting admin approval.",
+    message: "Registration successful. Please check your email to verify your account.",
     user: { id: user._id, name: user.name, email: user.email, role: user.role },
   });
 });
@@ -72,7 +97,10 @@ router.post("/login", async (req, res) => {
 // ─── GET /api/auth/me ─────────────────────────────────────────────────────────
 router.get("/me", protect, async (req, res) => {
   const user = await User.findById(req.user._id);
-  res.json({ user });
+  const userObj = user.toObject();
+  // Don't send full resumeText to frontend — just a flag
+  userObj.resumeText = user.resumeText ? true : false;
+  res.json({ user: userObj });
 });
 
 // ─── GET /api/auth/pending — Admin sees unapproved users ──────────────────────
@@ -163,3 +191,86 @@ router.patch("/student-resume", protect, authorize("student"), upload.single("re
 });
 
 module.exports = router;
+
+// ─── POST /api/auth/forgot-password ──────────────────────────────────────────
+router.post("/forgot-password", async (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ error: "Email is required." });
+
+  const user = await User.findOne({ email });
+  // Always return success — don't reveal if email exists (security)
+  if (!user) {
+    return res.json({ message: "If that email exists, a reset link has been sent." });
+  }
+
+  // Generate secure random token
+  const crypto = require("crypto");
+  const token = crypto.randomBytes(32).toString("hex");
+  const expiry = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+  user.resetToken = token;
+  user.resetTokenExpiry = expiry;
+  await user.save({ validateBeforeSave: false });
+
+  const resetUrl = `${process.env.CLIENT_URL}/reset-password/${token}`;
+
+  const { sendEmail } = require("../services/emailService");
+  await sendEmail({
+    to: user.email,
+    subject: "Reset Your PlaceIT Password",
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;padding:24px;background:#f9f9f9;border-radius:8px">
+        <h2 style="color:#2563eb">Reset Your Password</h2>
+        <p>Hi <strong>${user.name}</strong>,</p>
+        <p>You requested a password reset. Click the button below — this link expires in <strong>1 hour</strong>.</p>
+        <a href="${resetUrl}" style="display:inline-block;margin:16px 0;padding:12px 24px;background:#2563eb;color:white;border-radius:8px;text-decoration:none;font-weight:bold;">
+          Reset Password
+        </a>
+        <p style="color:#888;font-size:12px">If you didn't request this, ignore this email. Your password won't change.</p>
+        <hr/>
+        <small style="color:#888">PlaceIT — AI-Powered Campus Placement Portal</small>
+      </div>`,
+  });
+
+  res.json({ message: "If that email exists, a reset link has been sent." });
+});
+
+// ─── POST /api/auth/reset-password/:token ────────────────────────────────────
+router.post("/reset-password/:token", async (req, res) => {
+  const { password } = req.body;
+  if (!password || password.length < 8) {
+    return res.status(400).json({ error: "Password must be at least 8 characters." });
+  }
+
+  const user = await User.findOne({
+    resetToken: req.params.token,
+    resetTokenExpiry: { $gt: new Date() }, // not expired
+  });
+
+  if (!user) {
+    return res.status(400).json({ error: "Reset link is invalid or has expired. Request a new one." });
+  }
+
+  // Update password and clear token
+  user.password = password;
+  user.resetToken = undefined;
+  user.resetTokenExpiry = undefined;
+  await user.save();
+
+  res.json({ message: "Password reset successfully. You can now log in." });
+});
+
+// ─── GET /api/auth/verify-email/:token ───────────────────────────────────────
+router.get("/verify-email/:token", async (req, res) => {
+  const user = await User.findOne({ emailVerifyToken: req.params.token });
+
+  if (!user) {
+    return res.status(400).json({ error: "Verification link is invalid or already used." });
+  }
+
+  user.emailVerified = true;
+  user.emailVerifyToken = undefined;
+  await user.save({ validateBeforeSave: false });
+
+  res.json({ message: "Email verified successfully! Your account is now pending admin approval." });
+});

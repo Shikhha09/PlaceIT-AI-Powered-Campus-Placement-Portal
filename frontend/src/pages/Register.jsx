@@ -1,16 +1,44 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import toast from "react-hot-toast";
 import { authAPI } from "../api";
 
 const BRANCHES = ["CSE", "IT", "ECE", "EEE", "MECH", "CIVIL", "CHEM", "OTHER"];
 
+const studentSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  email: z.string().email("Enter a valid email address"),
+  password: z.string()
+    .min(8, "Password must be at least 8 characters")
+    .regex(/[A-Z]/, "Need at least one uppercase letter")
+    .regex(/[0-9]/, "Need at least one number"),
+  branch: z.string().min(1, "Select your branch"),
+  cgpa: z.coerce.number().min(0, "CGPA cannot be negative").max(10, "CGPA cannot exceed 10"),
+  graduationYear: z.coerce.number().min(2020, "Invalid year").max(2030, "Invalid year"),
+});
+
+const companySchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  email: z.string().email("Enter a valid email address"),
+  password: z.string()
+    .min(8, "Password must be at least 8 characters")
+    .regex(/[A-Z]/, "Need at least one uppercase letter")
+    .regex(/[0-9]/, "Need at least one number"),
+  companyName: z.string().min(2, "Company name is required"),
+  industry: z.string().min(1, "Industry is required"),
+});
+
 export default function Register() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [role, setRole] = useState("student");
-  const { register, handleSubmit, formState: { errors } } = useForm();
+
+  const { register, handleSubmit, reset, formState: { errors } } = useForm({
+    resolver: zodResolver(role === "student" ? studentSchema : companySchema),
+  });
 
   const onSubmit = async (data) => {
     setLoading(true);

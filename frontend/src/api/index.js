@@ -4,6 +4,9 @@ import api from "./axios";
 export const authAPI = {
   register: (data) => api.post("/auth/register", data),
   login: (data) => api.post("/auth/login", data),
+  forgotPassword: (email) => api.post("/auth/forgot-password", { email }),
+  resetPassword: (token, password) => api.post(`/auth/reset-password/${token}`, { password }),
+  verifyEmail: (token) => api.get(`/auth/verify-email/${token}`),
   me: () => api.get("/auth/me"),
   pending: () => api.get("/auth/pending"),
   approve: (id, action) => api.patch(`/auth/approve/${id}`, { action }),

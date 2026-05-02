@@ -64,11 +64,11 @@ export default function StudentProfile() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       <Navbar />
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">My Profile</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">My Profile</h1>
 
         {/* Resume Section */}
         <div className="card mb-6">
-          <h2 className="font-semibold text-gray-800 mb-4">Resume</h2>
+          <h2 className="font-semibold text-gray-800 dark:text-gray-200 mb-4">Resume</h2>
           <div className="flex items-center gap-4 flex-wrap">
             {user?.resumeUrl ? (
               <a href={user.resumeUrl} target="_blank" rel="noopener noreferrer"
@@ -85,6 +85,28 @@ export default function StudentProfile() {
             </label>
           </div>
           <p className="text-xs text-gray-400 mt-2">Supported: PDF, DOCX, TXT • Max 5MB</p>
+
+          {/* Resume parse warning — shown if resume uploaded but no text extracted */}
+          {user?.resumeUrl && !user?.resumeText && (
+            <div className="mt-3 flex items-start gap-2 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700/40 rounded-lg">
+              <span className="text-yellow-500 shrink-0">⚠️</span>
+              <p className="text-xs text-yellow-700 dark:text-yellow-300">
+                We couldn't extract text from your resume. This reduces your AI shortlisting score.
+                Make sure it's a <strong>text-based PDF</strong> (not a scanned image).
+                Try uploading again with a different file.
+              </p>
+            </div>
+          )}
+
+          {/* Success indicator */}
+          {user?.resumeUrl && user?.resumeText && (
+            <div className="mt-3 flex items-center gap-2 p-2.5 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700/40 rounded-lg">
+              <span className="text-green-500 shrink-0">✅</span>
+              <p className="text-xs text-green-700 dark:text-green-300">
+                Resume parsed successfully — your skills are ready for AI shortlisting.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Profile form */}

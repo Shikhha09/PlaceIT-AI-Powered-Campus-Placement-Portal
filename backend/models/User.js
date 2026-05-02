@@ -64,6 +64,14 @@ const userSchema = new mongoose.Schema(
     github: { type: String },
     bio: { type: String, maxlength: 500 },
 
+    // ── Password Reset ────────────────────────────────────────────────────────
+    resetToken: { type: String },
+    resetTokenExpiry: { type: Date },
+
+    // ── Email Verification ────────────────────────────────────────────────────
+    emailVerified: { type: Boolean, default: false },
+    emailVerifyToken: { type: String },
+
     // ── Company-specific fields ───────────────────────────────────────────────
     companyName: { type: String },
     industry: { type: String },

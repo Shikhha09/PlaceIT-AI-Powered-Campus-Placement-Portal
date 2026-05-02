@@ -51,8 +51,8 @@ router.post("/shortlist/:jobId", protect, authorize("company", "admin"), async (
     minCGPA: job.minCGPA,
   };
 
-  // Call FastAPI AI service
-  const ranked = await shortlistCandidates(candidates, jobPayload);
+  // Call FastAPI AI service (with automatic fallback)
+  const { ranked, usedFallback } = await shortlistCandidates(candidates, jobPayload);
 
   // Save AI scores back to applications
   const updatePromises = ranked.map((r) =>
@@ -67,12 +67,15 @@ router.post("/shortlist/:jobId", protect, authorize("company", "admin"), async (
   await log({
     actor: req.user._id, actorRole: req.user.role, action: "AI_SHORTLIST_TRIGGERED",
     entity: "Job", entityId: job._id,
-    meta: { totalCandidates: candidates.length, jobTitle: job.title },
+    meta: { totalCandidates: candidates.length, jobTitle: job.title, usedFallback },
   });
 
   res.json({
-    message: `AI ranked ${ranked.length} candidates.`,
+    message: usedFallback
+      ? `Ranked ${ranked.length} candidates using fallback (AI service unavailable).`
+      : `AI ranked ${ranked.length} candidates.`,
     ranked,
+    usedFallback,
   });
 });
 
