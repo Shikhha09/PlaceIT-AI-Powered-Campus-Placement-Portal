@@ -357,6 +357,7 @@ export default function Landing() {
             <div className="flex items-center gap-4 text-sm text-gray-500">
               <Link to="/login" className="hover:text-white transition-colors">Sign In</Link>
               <Link to="/register" className="hover:text-white transition-colors">Register</Link>
+              <Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
             </div>
           </div>
         </div>

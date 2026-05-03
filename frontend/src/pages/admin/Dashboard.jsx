@@ -56,7 +56,7 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
           {/* Placement Funnel */}
           <div className="card">
-            <h2 className="font-semibold text-gray-800 mb-4">Placement Funnel</h2>
+            <h2 className="font-semibold text-gray-900 dark:text-white mb-4">Placement Funnel</h2>
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={funnelData} layout="vertical">
                 <XAxis type="number" tick={{ fontSize: 11 }} />
@@ -73,7 +73,7 @@ export default function AdminDashboard() {
 
           {/* Branch-wise placements */}
           <div className="card">
-            <h2 className="font-semibold text-gray-800 mb-4">Placements by Branch</h2>
+            <h2 className="font-semibold text-gray-900 dark:text-white mb-4">Placements by Branch</h2>
             {pieData.length === 0 ? (
               <div className="flex items-center justify-center h-48 text-gray-400 text-sm">No offers yet</div>
             ) : (
@@ -92,7 +92,7 @@ export default function AdminDashboard() {
         {/* Offers by company */}
         {data?.offersByCompany?.length > 0 && (
           <div className="card mb-6">
-            <h2 className="font-semibold text-gray-800 mb-4">Offers by Company</h2>
+            <h2 className="font-semibold text-gray-900 dark:text-white mb-4">Offers by Company</h2>
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={data.offersByCompany}>
                 <XAxis dataKey="_id" tick={{ fontSize: 11 }} />
@@ -107,8 +107,8 @@ export default function AdminDashboard() {
         {/* Recent activity */}
         <div className="card">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold text-gray-800">Recent Activity</h2>
-            <Link to="/admin/analytics" className="text-sm text-primary-600 hover:underline">View full log</Link>
+            <h2 className="font-semibold text-gray-900 dark:text-white">Recent Activity</h2>
+            <Link to="/admin/analytics" className="text-sm text-primary-600 dark:text-primary-400 hover:underline">View full log</Link>
           </div>
           <div className="space-y-2">
             {data?.recentActivity?.map((log) => (
@@ -117,7 +117,7 @@ export default function AdminDashboard() {
                 <span className={`badge shrink-0 ${log.actorRole === "admin" ? "bg-purple-100 text-purple-700" : log.actorRole === "company" ? "bg-blue-100 text-blue-700" : "bg-green-100 text-green-700"}`}>
                   {log.actorRole}
                 </span>
-                <span className="text-gray-700 truncate"><strong>{log.actor?.name}</strong> — {log.action.replace(/_/g, " ")}</span>
+                <span className="text-gray-700 dark:text-gray-300 truncate"><strong>{log.actor?.name}</strong> — {log.action.replace(/_/g, " ")}</span>
               </div>
             ))}
           </div>

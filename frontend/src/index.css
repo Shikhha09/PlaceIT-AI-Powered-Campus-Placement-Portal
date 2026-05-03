@@ -52,3 +52,21 @@
     @apply hover:bg-gray-50 dark:hover:bg-gray-800/50;
   }
 }
+
+/* ── Mobile Responsive Fixes ─────────────────────────────────────────────── */
+@layer utilities {
+  /* Prevent horizontal overflow on mobile */
+  .mobile-safe {
+    @apply max-w-full overflow-x-hidden;
+  }
+
+  /* Stack flex items on mobile */
+  @media (max-width: 640px) {
+    .card {
+      @apply p-4;
+    }
+    table {
+      @apply block overflow-x-auto whitespace-nowrap;
+    }
+  }
+}
