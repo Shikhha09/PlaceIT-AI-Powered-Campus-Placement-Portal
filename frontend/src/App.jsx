@@ -9,6 +9,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import VerifyEmail from "./pages/VerifyEmail";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import OAuthCallback from "./pages/OAuthCallback";
 import ProtectedRoute from "./routes/ProtectedRoute";
 
 // Student pages
@@ -17,6 +18,8 @@ import StudentJobs from "./pages/student/Jobs";
 import StudentApplications from "./pages/student/Applications";
 import StudentProfile from "./pages/student/Profile";
 import SkillGap from "./pages/student/SkillGap";
+import PlacementCalendar from "./pages/student/Calendar";
+import SavedJobs from "./pages/student/SavedJobs";
 
 // Company pages
 import CompanyDashboard from "./pages/company/Dashboard";
@@ -49,6 +52,7 @@ export default function App() {
       <Route path="/reset-password/:token" element={<ResetPassword />} />
       <Route path="/verify-email/:token" element={<VerifyEmail />} />
       <Route path="/privacy" element={<PrivacyPolicy />} />
+      <Route path="/oauth/callback" element={<OAuthCallback />} />
       <Route path="/" element={<Landing />} />
       <Route path="/app" element={<RoleRedirect />} />
 
@@ -59,6 +63,8 @@ export default function App() {
         <Route path="/student/applications" element={<StudentApplications />} />
         <Route path="/student/profile" element={<StudentProfile />} />
         <Route path="/student/skill-gap/:jobId" element={<SkillGap />} />
+        <Route path="/student/calendar" element={<PlacementCalendar />} />
+        <Route path="/student/saved" element={<SavedJobs />} />
       </Route>
 
       {/* Company routes */}

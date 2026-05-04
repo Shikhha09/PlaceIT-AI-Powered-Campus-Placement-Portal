@@ -9,6 +9,8 @@ const navLinks = {
   student: [
     { to: "/student/dashboard",    label: "Dashboard" },
     { to: "/student/jobs",         label: "Jobs" },
+    { to: "/student/calendar",     label: "Calendar" },
+    { to: "/student/saved",        label: "Saved" },
     { to: "/student/applications", label: "My Applications" },
     { to: "/student/profile",      label: "Profile" },
   ],

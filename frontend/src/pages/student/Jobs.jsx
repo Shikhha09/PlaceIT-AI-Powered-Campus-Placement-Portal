@@ -1,10 +1,10 @@
 import { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { jobsAPI, applicationsAPI } from "../../api";
+import { jobsAPI, applicationsAPI, bookmarkAPI } from "../../api";
 import Navbar from "../../components/Navbar";
 import { StatusBadge, Spinner, EmptyState } from "../../components/common";
 import toast from "react-hot-toast";
-import { Search, MapPin, DollarSign, Clock, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, MapPin, DollarSign, Clock, ChevronLeft, ChevronRight, Bookmark, BookmarkCheck } from "lucide-react";
 
 export default function StudentJobs() {
   const [jobs, setJobs] = useState([]);
@@ -14,6 +14,7 @@ export default function StudentJobs() {
   const [search, setSearch] = useState("");
   const [jobType, setJobType] = useState("");
   const [appliedIds, setAppliedIds] = useState(new Set());
+  const [bookmarkedIds, setBookmarkedIds] = useState(new Set(bookmarkAPI.getAll().map((b) => b._id)));
 
   const fetchJobs = useCallback(async (page = 1) => {
     setLoading(true);
@@ -48,6 +49,18 @@ export default function StudentJobs() {
       toast.error(err.response?.data?.error || "Failed to apply.");
     } finally {
       setApplying(null);
+    }
+  };
+
+  const handleBookmark = (job) => {
+    if (bookmarkedIds.has(job._id)) {
+      bookmarkAPI.remove(job._id);
+      setBookmarkedIds((prev) => { const s = new Set(prev); s.delete(job._id); return s; });
+      toast("Removed from saved jobs", { icon: "🔖" });
+    } else {
+      bookmarkAPI.add(job);
+      setBookmarkedIds((prev) => new Set([...prev, job._id]));
+      toast.success("Saved! View in Saved Jobs.");
     }
   };
 
@@ -119,6 +132,20 @@ export default function StudentJobs() {
                       <Link to={`/student/skill-gap/${job._id}`} className="btn-secondary text-xs py-1 px-3">
                         Skill Gap
                       </Link>
+                      <button
+                        onClick={() => handleBookmark(job)}
+                        className={`p-1.5 rounded-lg transition-colors ${
+                          bookmarkedIds.has(job._id)
+                            ? "text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20"
+                            : "text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        }`}
+                        title={bookmarkedIds.has(job._id) ? "Remove bookmark" : "Save job"}
+                      >
+                        {bookmarkedIds.has(job._id)
+                          ? <BookmarkCheck size={16} />
+                          : <Bookmark size={16} />
+                        }
+                      </button>
                       {appliedIds.has(job._id) ? (
                         <span className="badge bg-green-100 text-green-700">Applied ✓</span>
                       ) : (

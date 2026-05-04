@@ -145,7 +145,7 @@ router.patch("/approve/:id", protect, authorize("admin"), async (req, res) => {
 
 // ─── PATCH /api/auth/student-profile — Student updates profile ───────────────
 router.patch("/student-profile", protect, authorize("student"), async (req, res) => {
-  const allowed = ["name", "branch", "cgpa", "graduationYear", "skills", "experience", "linkedIn", "github", "bio"];
+  const allowed = ["name", "branch", "cgpa", "graduationYear", "skills", "experience", "linkedIn", "github", "bio", "phone"];
   const updates = {};
   allowed.forEach((f) => { if (req.body[f] !== undefined) updates[f] = req.body[f]; });
 

@@ -20,9 +20,14 @@ const applicationRoutes = require("./routes/applications");
 const interviewRoutes = require("./routes/interviews");
 const aiRoutes = require("./routes/ai");
 const adminRoutes = require("./routes/admin");
+const oauthRoutes = require("./routes/oauth");
 
 const app = express();
 const server = http.createServer(app);
+
+// Initialize Passport (Google OAuth) — must be after app is created
+const passport = require("./config/passport");
+app.use(passport.initialize());
 
 // ─── Socket.io Setup ──────────────────────────────────────────────────────────
 const io = new Server(server, {
@@ -55,20 +60,31 @@ app.use(helmet());
 app.use(mongoSanitize());
 app.use(cors({ origin: process.env.CLIENT_URL || "http://localhost:5173", credentials: true }));
 app.use(express.json({ limit: "10mb" }));
+
+// Serve locally uploaded files (used when Cloudinary is not configured)
+const path = require("path");
+const fs = require("fs");
+const uploadsDir = path.join(__dirname, "uploads");
+if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+app.use("/uploads", express.static(uploadsDir));
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan(process.env.NODE_ENV === "development" ? "dev" : "combined"));
 
 // ─── Rate Limiters ────────────────────────────────────────────────────────────
+const isDev = process.env.NODE_ENV !== 'production';
+
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 20,
-  message: { error: "Too many attempts, please try again after 15 minutes." },
+  windowMs: 15 * 60 * 1000,
+  max: 200,
+  skip: () => isDev, // no rate limiting in development
+  message: { error: 'Too many attempts, please try again after 15 minutes.' },
 });
 
 const apiLimiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minute
-  max: 100,
-  message: { error: "Too many requests, please slow down." },
+  windowMs: 60 * 1000,
+  max: 1000,
+  skip: () => isDev, // no rate limiting in development
+  message: { error: 'Too many requests, please slow down.' },
 });
 
 app.use("/api/auth", authLimiter);
@@ -84,6 +100,7 @@ app.get("/api/health", (req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api/auth", oauthRoutes);
 app.use("/api/jobs", jobRoutes);
 app.use("/api/applications", applicationRoutes);
 app.use("/api/interviews", interviewRoutes);

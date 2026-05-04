@@ -20,6 +20,7 @@ export default function StudentProfile() {
       experience: user?.experience || 0,
       linkedIn: user?.linkedIn || "",
       github: user?.github || "",
+      phone: user?.phone || "",
       bio: user?.bio || "",
     },
   });
@@ -150,12 +151,26 @@ export default function StudentProfile() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">GitHub URL</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">GitHub URL</label>
               <input {...register("github")} type="url" className="input" placeholder="https://github.com/..." />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                WhatsApp Number
+                <span className="ml-1 text-xs text-gray-400 font-normal">(for instant notifications)</span>
+              </label>
+              <input
+                {...register("phone")}
+                type="tel"
+                className="input"
+                placeholder="+919876543210 (with country code)"
+              />
+              <p className="text-xs text-gray-400 mt-1">Add your number to receive WhatsApp alerts for status updates and interviews.</p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Bio</label>
               <textarea {...register("bio")} rows={3} maxLength={500} className="input resize-none" placeholder="Brief intro about yourself..." />
             </div>
 

@@ -5,6 +5,7 @@ const Job = require("../models/Job");
 const User = require("../models/User");
 const { protect, authorize } = require("../middleware/auth");
 const { sendEmail, emailTemplates } = require("../services/emailService");
+const { sendWhatsApp, whatsappTemplates } = require("../services/whatsappService");
 const { log } = require("../utils/activityLogger");
 
 // ─── POST /api/applications — Student applies to a job ───────────────────────
@@ -121,6 +122,17 @@ router.patch("/:id/status", protect, authorize("company", "admin"), async (req, 
     application.job.company.companyName
   );
   await sendEmail({ to: application.student.email, ...tpl });
+
+  // WhatsApp notification if student has phone number
+  if (application.student.phone) {
+    const msg = whatsappTemplates.statusUpdated(
+      application.student.name,
+      application.job.title,
+      status,
+      application.job.company.companyName
+    );
+    await sendWhatsApp(application.student.phone, msg);
+  }
 
   await log({
     actor: req.user._id, actorRole: req.user.role, action: "STATUS_UPDATED",

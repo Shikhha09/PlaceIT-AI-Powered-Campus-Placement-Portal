@@ -63,6 +63,7 @@ const userSchema = new mongoose.Schema(
     linkedIn: { type: String },
     github: { type: String },
     bio: { type: String, maxlength: 500 },
+    phone: { type: String }, // for WhatsApp notifications e.g. +919876543210
 
     // ── Password Reset ────────────────────────────────────────────────────────
     resetToken: { type: String },
@@ -71,6 +72,9 @@ const userSchema = new mongoose.Schema(
     // ── Email Verification ────────────────────────────────────────────────────
     emailVerified: { type: Boolean, default: false },
     emailVerifyToken: { type: String },
+
+    // ── Google OAuth ──────────────────────────────────────────────────────────
+    googleId: { type: String },
 
     // ── Company-specific fields ───────────────────────────────────────────────
     companyName: { type: String },

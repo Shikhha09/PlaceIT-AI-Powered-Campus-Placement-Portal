@@ -7,6 +7,7 @@ export const authAPI = {
   forgotPassword: (email) => api.post("/auth/forgot-password", { email }),
   resetPassword: (token, password) => api.post(`/auth/reset-password/${token}`, { password }),
   verifyEmail: (token) => api.get(`/auth/verify-email/${token}`),
+  me: (token) => api.get("/auth/me", { headers: { Authorization: `Bearer ${token}` } }),
   me: () => api.get("/auth/me"),
   pending: () => api.get("/auth/pending"),
   approve: (id, action) => api.patch(`/auth/approve/${id}`, { action }),
@@ -59,4 +60,23 @@ export const adminAPI = {
   exportApplications: () => window.open("/api/admin/export/applications.csv", "_blank"),
   exportLogs: () => window.open("/api/admin/export/activity-logs.csv", "_blank"),
   toggleUser: (id) => api.patch(`/admin/users/${id}/toggle`),
+};
+
+// ── Bookmarks (localStorage-based — no backend needed) ────────────────────────
+export const bookmarkAPI = {
+  getAll: () => {
+    try { return JSON.parse(localStorage.getItem("placeit_bookmarks") || "[]"); }
+    catch { return []; }
+  },
+  add: (job) => {
+    const bookmarks = bookmarkAPI.getAll();
+    if (!bookmarks.find((b) => b._id === job._id)) {
+      localStorage.setItem("placeit_bookmarks", JSON.stringify([...bookmarks, job]));
+    }
+  },
+  remove: (jobId) => {
+    const bookmarks = bookmarkAPI.getAll().filter((b) => b._id !== jobId);
+    localStorage.setItem("placeit_bookmarks", JSON.stringify(bookmarks));
+  },
+  isBookmarked: (jobId) => bookmarkAPI.getAll().some((b) => b._id === jobId),
 };
