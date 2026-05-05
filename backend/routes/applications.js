@@ -91,7 +91,7 @@ router.patch("/:id/status", protect, authorize("company", "admin"), async (req, 
   }
 
   const application = await Application.findById(req.params.id)
-    .populate("student", "name email")
+    .populate("student", "name email phone")
     .populate({ path: "job", populate: { path: "company", select: "companyName" } });
 
   if (!application) return res.status(404).json({ error: "Application not found." });
@@ -124,6 +124,7 @@ router.patch("/:id/status", protect, authorize("company", "admin"), async (req, 
   await sendEmail({ to: application.student.email, ...tpl });
 
   // WhatsApp notification if student has phone number
+  console.log(`📱 Student phone: ${application.student.phone || "not set"}`);
   if (application.student.phone) {
     const msg = whatsappTemplates.statusUpdated(
       application.student.name,
@@ -132,6 +133,8 @@ router.patch("/:id/status", protect, authorize("company", "admin"), async (req, 
       application.job.company.companyName
     );
     await sendWhatsApp(application.student.phone, msg);
+  } else {
+    console.log("📱 WhatsApp skipped — student has no phone number saved in profile");
   }
 
   await log({

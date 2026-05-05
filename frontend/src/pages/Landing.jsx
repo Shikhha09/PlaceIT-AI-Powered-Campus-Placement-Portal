@@ -13,42 +13,42 @@ const features = [
     icon: <Brain size={24} />,
     title: "AI Candidate Ranking",
     description:
-      "TF-IDF cosine similarity + Gradient Boosting ML ranks 150+ resumes in under 10 seconds. What took recruiters 4 hours now takes one click.",
+      "TF-IDF cosine similarity + Gradient Boosting ML ranks 150+ resumes in under 10 seconds. Explainable scores show exactly why each candidate ranked where they did.",
     color: "blue",
   },
   {
     icon: <Bell size={24} />,
     title: "Real-Time Notifications",
     description:
-      "Socket.io WebSockets push live updates the moment status changes. Students know instantly — no more calling the TPO.",
+      "Socket.io WebSockets push live updates instantly. Plus email and WhatsApp alerts via Twilio — students know the moment their status changes.",
     color: "purple",
   },
   {
     icon: <FileSearch size={24} />,
     title: "Skill Gap Analyzer",
     description:
-      "Students see exactly which skills they're missing for any job before applying — with a match percentage and actionable guidance.",
+      "Students see exactly which skills they're missing for any job before applying — with match percentage, missing skills highlighted, and actionable guidance.",
     color: "green",
   },
   {
     icon: <BarChart3 size={24} />,
-    title: "Admin Analytics",
+    title: "Analytics Dashboards",
     description:
-      "Live placement funnel, branch-wise stats, offer rates, and CSV exports. TPOs get data-driven insights, not end-of-year guesswork.",
+      "Admin gets live placement funnel, branch-wise stats, and CSV exports. Companies see their own hiring pipeline with applicant charts and status breakdowns.",
     color: "orange",
   },
   {
     icon: <Upload size={24} />,
-    title: "Resume Parsing",
+    title: "Resume Parsing + Calendar",
     description:
-      "PDF and DOCX resumes are automatically parsed and converted to structured text that feeds directly into the AI scoring pipeline.",
+      "PDF/DOCX resumes auto-parsed for AI scoring. A monthly placement drive calendar shows all upcoming drives — students can apply directly from it.",
     color: "pink",
   },
   {
     icon: <ShieldCheck size={24} />,
-    title: "Role-Based Security",
+    title: "Production-Grade Security",
     description:
-      "JWT auth, bcrypt hashing, rate limiting, and NoSQL injection prevention. Three isolated roles — Student, Company, Admin.",
+      "JWT auth, bcrypt hashing, Google OAuth, password reset flow, email verification, rate limiting, error boundaries, and role-based access on every route.",
     color: "red",
   },
 ];
@@ -62,8 +62,10 @@ const roles = [
       "Browse jobs filtered by your eligibility",
       "Get AI-powered job recommendations",
       "Check skill gap before applying",
+      "Save jobs with bookmarks",
+      "View drives on placement calendar",
       "Track application status live",
-      "View upcoming interview schedule",
+      "Get WhatsApp + email alerts instantly",
     ],
   },
   {
@@ -74,8 +76,9 @@ const roles = [
       "Post jobs with custom eligibility criteria",
       "Trigger AI shortlisting in one click",
       "See ranked candidates with score breakdown",
+      "Analytics — applicants per job, status charts",
       "Schedule interviews directly",
-      "Track entire hiring pipeline",
+      "Send WhatsApp notifications to students",
     ],
   },
   {
@@ -83,18 +86,19 @@ const roles = [
     role: "Admin (TPO)",
     color: "purple",
     points: [
-      "Approve student and company accounts",
-      "Monitor live placement analytics",
-      "Export reports as CSV",
-      "Full activity audit trail",
+      "Approve verified student and company accounts",
+      "Monitor live placement analytics with charts",
+      "Export CSV reports for accreditation",
+      "Full audit trail — every action logged",
       "Manage all users centrally",
+      "Deactivate accounts instantly",
     ],
   },
 ];
 
 const stats = [
   { value: "10s", label: "AI shortlists 150+ resumes" },
-  { value: "3", label: "Services in production" },
+  { value: "6", label: "Services in production" },
   { value: "90%", label: "Reduction in screening time" },
   { value: "87%", label: "ML model accuracy" },
 ];
@@ -304,7 +308,12 @@ export default function Landing() {
             Built With
           </p>
           <div className="flex flex-wrap justify-center gap-3">
-            {["React 18", "Node.js", "Express", "Python", "FastAPI", "MongoDB", "Socket.io", "scikit-learn", "Tailwind CSS", "Supabase", "Vercel", "Render"].map((tech) => (
+            {[
+              "React 18", "Node.js", "Express", "Python", "FastAPI",
+              "MongoDB", "Socket.io", "scikit-learn", "Tailwind CSS",
+              "Supabase", "Twilio", "Passport OAuth", "JWT", "Zod",
+              "Recharts", "react-big-calendar", "Vercel", "Render"
+            ].map((tech) => (
               <span key={tech}
                 className="px-4 py-2 bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm font-medium rounded-full border border-gray-200 dark:border-gray-700">
                 {tech}
