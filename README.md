@@ -1,25 +1,25 @@
-<div align="center">
+# ⚡ PlaceIT — AI-Powered Campus Placement Portal
 
-# ⚡ PlaceIT
-### AI-Powered Campus Placement Portal
-
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-Visit%20Site-2563eb?style=for-the-badge&logo=vercel)](https://place-it-ai-powered-campus-placemen.vercel.app/)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Visit%20Site-2563eb?style=for-the-badge&logo=vercel)](https://placeit-ai-powered-campus-placemen.vercel.app)
 [![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github)](https://github.com/Shikhha09/PlaceIT-AI-Powered-Campus-Placement-Portal)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
-**A full-stack distributed system that replaces manual campus placement processes with an AI-powered platform featuring real-time notifications, ML-based candidate ranking, and comprehensive analytics.**
-
-[View Demo](#demo) · [Features](#features) · [Tech Stack](#tech-stack) · [Setup](#setup) · [API Docs](#api-endpoints)
-
-</div>
+> A full-stack distributed system that replaces manual campus placement processes with an AI-powered platform featuring ML candidate ranking, real-time notifications, placement calendar, and WhatsApp alerts.
 
 ---
 
 ## 📸 Screenshots
 
-| Student Dashboard (Dark) | AI Shortlisting | Admin Analytics |
+| Landing Page | Student Dashboard | AI Shortlisting |
 |---|---|---|
-| ![Student Dashboard](docs/student-dashboard.png) | ![AI Shortlist](docs/ai-shortlist.png) | ![Analytics](docs/analytics.png) |
+| ![Landing](docs/landing.png) | ![Student](docs/student-dashboard.png) | ![AI](docs/ai-shortlist.png) |
+
+| Admin Analytics | Placement Calendar | Company Dashboard |
+|---|---|---|
+| ![Analytics](docs/analytics.png) | ![Calendar](docs/calendar.png) | ![Company](docs/company-dashboard.png) |
+
+> **Live Demo:** [placeit-ai-powered-campus-placemen.vercel.app](https://placeit-ai-powered-campus-placemen.vercel.app)
+> Use one-click demo buttons on the login page to explore all three roles instantly.
 
 ---
 
@@ -27,51 +27,86 @@
 
 Most college placement cells still run on **Excel sheets, WhatsApp groups, and paper forms**. This causes:
 
-- Students missing drives due to late WhatsApp notifications
-- TPOs spending 3–4 hours manually screening 150+ resumes per drive
+- Students miss drives because of late informal notifications
+- TPOs spend 3-4 hours manually screening 150+ resumes per drive
 - No visibility into application status — students call the TPO individually
 - No data on placement trends — reports compiled manually at year end
-- Companies receiving unsorted resume dumps with no ranking
+- Companies receive unsorted resume dumps with no ranking or filtering
 
-**PlaceIT replaces this entire workflow** with a structured, AI-powered platform.
+**PlaceIT replaces this entire workflow** with a structured, AI-powered platform:
+
+| Manual Process | PlaceIT |
+|---|---|
+| WhatsApp/notice board announcements | Real-time Socket.io + WhatsApp notifications |
+| TPO screens resumes manually (3-4 hrs) | AI ranks 150+ candidates in 10 seconds |
+| Students unaware of skill gaps | Skill Gap Analyzer shows exactly what's missing |
+| Status via notice board or phone calls | Live dashboard + email + WhatsApp updates |
+| Interview scheduling via email chains | Direct scheduling with auto-notification |
+| End-of-year manual placement report | Live analytics dashboard with CSV export |
+| No account verification | Email verification + admin approval flow |
 
 ---
 
 ## ✨ Features
 
-### 👨‍🎓 Student
-- Role-based registration with admin approval flow
-- Profile with CGPA, branch, skills, experience
-- Resume upload (PDF/DOCX) with automatic text extraction
-- Personalized job recommendations ranked by skill match
-- Skill Gap Analyzer — see exactly what skills you're missing for any job
-- Apply to jobs with automatic eligibility check (CGPA + branch)
-- Real-time application status tracking
-- Live notifications via Socket.io (no page refresh needed)
-- Interview schedule tracking with Google Meet links
+### Student
+- Role-based registration with **email verification** and admin approval flow
+- Resume upload (PDF/DOCX) with automatic text extraction and parse validation warning
+- Personalized job recommendations ranked by skill match percentage
+- **Skill Gap Analyzer** — see exactly which skills are missing for any job before applying
+- Apply to jobs with automatic CGPA and branch eligibility enforcement
+- **Placement Drive Calendar** — monthly/weekly/agenda view of all active drives
+- **Job Bookmarking** — save jobs to apply later, persisted in localStorage
+- Real-time application status tracking with pipeline progress bar
+- Live Socket.io notifications — no page refresh needed
+- Interview schedule tracking with date, mode, and Google Meet links
+- AI Score visible on each application with Skill Match, CGPA, ML Confidence breakdown
+- WhatsApp notifications when application status changes
 
-### 🏢 Company
-- Post jobs with required skills, CGPA cutoff, branch eligibility
-- View all applicants with AI-ranked scores
-- **AI Shortlisting** — rank candidates using TF-IDF + ML in seconds
-- Update application status with automated student notifications
-- Schedule interviews directly (online/offline, with meet link)
-- View interview pipeline per job
+### Company
+- Post jobs with required skills, minimum CGPA, allowed branches, and deadline
+- View all applicants ranked by AI shortlisting scores
+- **AI Shortlisting** — TF-IDF + Gradient Boosting ML ranks candidates in seconds
+- Graceful fallback ranking (CGPA + skill overlap) when AI service is sleeping
+- Update application status with automated email and WhatsApp notifications to students
+- Schedule interviews directly — online/offline, with meet link or venue
+- **Analytics Dashboard** — applicants per job bar chart, application status pie chart
+- Pagination on applicants list — handles 200+ applicants without crashing
+- Loading state on status updates — prevents double-submit
 
-### 👨‍💼 Admin (TPO)
-- Approve/reject student and company registrations
-- Analytics dashboard with placement funnel, branch stats, company offers
-- Export application data and audit logs as CSV
-- User management with activate/deactivate
-- Full activity audit trail — every action logged with timestamp
-- Real-time overview of all placement activity
+### Admin (TPO)
+- Approve or reject student and company registrations
+- Only email-verified accounts appear in the pending approvals list
+- Live analytics dashboard — placement funnel, branch-wise stats, offers by company
+- Export application data and audit logs as CSV with JWT authentication
+- User management with search, role filter, activate/deactivate
+- Full activity audit trail — every action logged with actor, timestamp, and metadata
 
-### 🤖 AI Service
-- **TF-IDF Cosine Similarity** — matches resume text against job descriptions
-- **Gradient Boosting Classifier** — predicts placement probability from CGPA + skills + experience
-- **Skill keyword overlap** — exact matching between tagged skills and requirements
-- **Explainable scores** — breakdown shows Skill Match %, CGPA Score, ML Confidence
-- PDF and DOCX resume parsing for text extraction
+### Security and Auth
+- JWT authentication with configurable expiry
+- bcryptjs password hashing (12 salt rounds)
+- **Password reset flow** — time-limited email token (1 hour expiry)
+- **Email verification** on registration before admin sees the account
+- **Google OAuth login** — one-click Google sign-in via Passport.js
+- Rate limiting on auth routes (disabled in development, strict in production)
+- HTTP security headers via Helmet
+- NoSQL injection prevention via mongo-sanitize
+- Role-based access control on every protected backend route
+- React Error Boundaries — no white screen crashes in production
+
+### AI Service
+- TF-IDF Cosine Similarity — resume text vs job description semantic matching (40% weight)
+- Gradient Boosting Classifier — 87% accuracy placement prediction ML model (30% weight)
+- CGPA normalized score (30% weight)
+- Explainable scores — breakdown shows Skill Match %, CGPA Score, ML Confidence %
+- Resume text extraction from PDF via pdfplumber and DOCX via python-docx
+- Resume parse warning — alerts student if text extraction failed (scanned PDF)
+- Fallback scorer — ranks by CGPA and skill overlap when AI service is unavailable
+
+### Notifications
+- Real-time Socket.io notifications with bell icon badge and toast popups
+- Email notifications via Gmail SMTP — application received, status updated, interview scheduled, account approved
+- WhatsApp notifications via Twilio — instant messages on status changes and interviews
 
 ---
 
@@ -81,12 +116,15 @@ Most college placement cells still run on **Excel sheets, WhatsApp groups, and p
 | Technology | Purpose |
 |---|---|
 | React 18 + Vite | UI framework with fast HMR |
-| Tailwind CSS v3 | Utility-first styling with dark mode |
+| Tailwind CSS v3 | Utility-first styling with full dark mode |
 | React Router v6 | Client-side routing with protected routes |
 | Socket.io Client | Real-time notifications |
-| Recharts | Analytics charts (Bar, Pie, Funnel) |
-| React Hook Form + Zod | Form handling and validation |
+| Recharts | Analytics charts — Bar, Pie, Funnel |
+| react-big-calendar | Placement drive calendar |
+| React Hook Form + Zod | Form handling with schema validation |
 | Axios | HTTP client with JWT interceptor |
+| date-fns | Date formatting for calendar |
+| Lucide React | Icon library |
 
 ### Backend
 | Technology | Purpose |
@@ -94,13 +132,15 @@ Most college placement cells still run on **Excel sheets, WhatsApp groups, and p
 | Node.js 20 + Express 5 | REST API server |
 | MongoDB + Mongoose | Database with schema validation |
 | JWT + bcryptjs | Authentication and password hashing |
+| Passport + passport-google-oauth20 | Google OAuth login |
 | Socket.io | WebSocket server for real-time events |
-| Multer | File upload handling |
+| Multer | File upload middleware |
 | Supabase Storage | Cloud file storage for resumes |
-| Nodemailer | Transactional email with Gmail SMTP |
+| Nodemailer | Transactional email via Gmail SMTP |
+| Twilio | WhatsApp notifications |
 | Helmet + mongo-sanitize | Security headers and NoSQL injection prevention |
 | express-rate-limit | Brute force protection |
-| Jest + Supertest | Integration testing |
+| Jest + Supertest | Integration testing (30+ tests) |
 
 ### AI Service
 | Technology | Purpose |
@@ -116,124 +156,92 @@ Most college placement cells still run on **Excel sheets, WhatsApp groups, and p
 | Technology | Purpose |
 |---|---|
 | MongoDB Atlas | Cloud database |
-| Supabase Storage | Resume file storage |
-| Vercel | Frontend deployment |
-| Render | Backend + AI service deployment |
-| Docker + Docker Compose | Containerization |
-| GitHub Actions | CI/CD pipeline |
+| Supabase Storage | Resume file storage with public CDN |
+| Vercel | Frontend deployment with auto-deploy |
+| Render | Backend and AI service deployment |
+| Docker + Docker Compose | Multi-service containerization |
+| GitHub Actions | CI/CD pipeline with automated tests |
 
 ---
 
 ## 🏗️ Architecture
 
 ```
-┌─────────────────────┐     HTTP/REST      ┌─────────────────────────┐
-│   React Frontend    │ ◄─────────────────► │   Express Backend API   │
-│   (Vercel)          │                     │   (Render)              │
-│                     │   WebSocket         │                         │
-│                     │ ◄─────────────────► │   Socket.io Server      │
-└─────────────────────┘                     └────────────┬────────────┘
-                                                         │ HTTP
-                                            ┌────────────▼────────────┐
-                                            │   Python AI Service     │
-                                            │   (FastAPI on Render)   │
-                                            └─────────────────────────┘
-                                                         │
-                              ┌──────────────────────────┼──────────────────┐
-                              │                          │                  │
-                   ┌──────────▼──────┐      ┌───────────▼──────┐  ┌────────▼────────┐
-                   │  MongoDB Atlas  │      │ Supabase Storage │  │  Gmail SMTP     │
-                   │  (Database)     │      │ (Resume Files)   │  │  (Emails)       │
-                   └─────────────────┘      └──────────────────┘  └─────────────────┘
+Browser (React + Vite)
+        |
+        | HTTP/REST + WebSocket
+        |
+Express Backend API (Node.js) ──── MongoDB Atlas
+        |                     ──── Supabase Storage
+        | HTTP                ──── Gmail SMTP
+        |                     ──── Twilio WhatsApp
+Python AI Service (FastAPI)
+        |
+        ML Model (scikit-learn)
+        Resume Parser (pdfplumber)
 ```
+
+The three services are fully independent. Frontend talks only to Express. Express calls the AI service internally when shortlisting is triggered. Each service can be deployed and scaled independently.
 
 ---
 
-## 🔄 How It Works
-
-### AI Shortlisting Pipeline
-```
-Company clicks "AI Shortlist"
-        ↓
-Express fetches all applicants from MongoDB
-        ↓
-Sends to FastAPI: { candidates[], job{} }
-        ↓
-FastAPI runs 3 scoring signals:
-  1. TF-IDF cosine similarity (resume text vs job description) — 40% weight
-  2. Skill keyword overlap (tagged skills vs required skills) — part of 40%
-  3. Gradient Boosting ML model (CGPA + skills + experience) — 30% weight
-  4. CGPA normalized score — 30% weight
-        ↓
-Returns ranked list with scores 0-100 + breakdown
-        ↓
-Express saves scores to MongoDB
-        ↓
-Company sees ranked candidates instantly
-```
-
-### Real-Time Notification Flow
-```
-Company updates status → Express saves to DB
-        ↓
-io.to(studentId).emit("notification", { message })
-        ↓
-Student's browser receives via WebSocket
-        ↓
-Toast popup + bell badge updates instantly
-No page refresh needed
-```
-
----
-
-## ⚙️ Setup & Installation
+## ⚙️ Setup and Installation
 
 ### Prerequisites
-- Node.js 20+
-- Python 3.11+
-- MongoDB (local or Atlas)
+
+- Node.js 20 or higher
+- Python 3.11
+- MongoDB local or Atlas account
 - Git
 
-### Clone the Repository
+### Step 1 — Clone the repository
+
 ```bash
-git clone https://github.com/yourusername/placeit.git
-cd placeit
+git clone https://github.com/Shikhha09/PlaceIT-AI-Powered-Campus-Placement-Portal.git
+cd PlaceIT-AI-Powered-Campus-Placement-Portal
 ```
 
-### Backend Setup
+### Step 2 — Backend setup
+
 ```bash
 cd backend
 cp .env.example .env
-# Edit .env with your values (see Environment Variables section)
+# Edit .env with your values — see Environment Variables section below
 npm install
-npm run seed    # Load demo data
-npm run dev     # Starts on http://localhost:5000
+npm run seed
+npm run dev
 ```
 
-### Frontend Setup
+Backend runs at `http://localhost:5000`
+Health check: `http://localhost:5000/api/health`
+
+### Step 3 — Frontend setup
+
 ```bash
 cd frontend
 npm install
-npm run dev     # Starts on http://localhost:5173
+npm run dev
 ```
 
-### AI Service Setup
+Frontend runs at `http://localhost:5173`
+
+### Step 4 — AI service setup
+
 ```bash
 cd ai-service
 python -m venv .venv
-
-# Windows
-.venv\Scripts\activate
-
-# Mac/Linux
-source .venv/bin/activate
-
+.venv\Scripts\activate        # Windows
+source .venv/bin/activate     # Mac/Linux
 pip install -r requirements.txt
-python model/train.py    # Train ML model once
+python model/train.py         # Train ML model once — takes ~30 seconds
 uvicorn main:app --reload --port 8000
 ```
 
-### Or Use Docker (runs everything with one command)
+AI service runs at `http://localhost:8000`
+Health check: `http://localhost:8000/health`
+
+### Or run everything with Docker
+
 ```bash
 docker-compose up --build
 ```
@@ -249,33 +257,44 @@ Create `backend/.env` from `backend/.env.example`:
 PORT=5000
 NODE_ENV=development
 
-# MongoDB
+# MongoDB Atlas
 MONGO_URI=mongodb+srv://user:pass@cluster.mongodb.net/campus_placement
 
 # JWT
-JWT_SECRET=your_64_char_random_hex_string
+JWT_SECRET=generate_with_node_crypto_randomBytes_64_hex
 JWT_EXPIRE=7d
 
-# Supabase Storage (for resume uploads)
+# Supabase Storage (resume uploads)
 SUPABASE_URL=https://xxxx.supabase.co
 SUPABASE_KEY=your_supabase_anon_key
 SUPABASE_BUCKET=resumes
 
-# Gmail SMTP (for email notifications)
+# Gmail SMTP (email notifications)
 MAIL_HOST=smtp.gmail.com
 MAIL_PORT=587
 MAIL_USER=your@gmail.com
 MAIL_PASS=your_16_char_app_password
 MAIL_FROM=your@gmail.com
 
-# AI Service
+# Google OAuth (optional)
+GOOGLE_CLIENT_ID=your_google_client_id.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+SERVER_URL=http://localhost:5000
+
+# Twilio WhatsApp (optional)
+TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+TWILIO_AUTH_TOKEN=your_auth_token
+TWILIO_WHATSAPP_FROM=whatsapp:+14155238886
+
+# AI Service URL
 AI_SERVICE_URL=http://localhost:8000
 
-# Frontend URL (for CORS)
+# Frontend URL for CORS
 CLIENT_URL=http://localhost:5173
 ```
 
 Create `frontend/.env`:
+
 ```env
 VITE_API_URL=http://localhost:5000/api
 ```
@@ -284,7 +303,7 @@ VITE_API_URL=http://localhost:5000/api
 
 ## 🎭 Demo Accounts
 
-After running `npm run seed`:
+After running `npm run seed` in the backend folder:
 
 | Role | Email | Password |
 |---|---|---|
@@ -295,62 +314,69 @@ After running `npm run seed`:
 | Student | priya@student.edu | Password@123 |
 | Student | rohan@student.edu | Password@123 |
 
+The login page also has one-click demo buttons for each role — no typing required.
+
 ---
 
 ## 📡 API Endpoints
 
-### Auth
+### Authentication
 ```
-POST   /api/auth/register              Register student or company
-POST   /api/auth/login                 Login and get JWT
-GET    /api/auth/me                    Get current user
-GET    /api/auth/pending               Get pending approvals (admin)
-PATCH  /api/auth/approve/:id           Approve/reject user (admin)
-PATCH  /api/auth/student-profile       Update student profile
-PATCH  /api/auth/student-resume        Upload resume (multipart)
+POST   /api/auth/register               Register student or company
+POST   /api/auth/login                  Login and receive JWT
+GET    /api/auth/me                     Get current user profile
+GET    /api/auth/pending                Pending approvals (admin only)
+PATCH  /api/auth/approve/:id            Approve or reject user (admin only)
+PATCH  /api/auth/student-profile        Update student profile
+PATCH  /api/auth/student-resume         Upload resume file (multipart/form-data)
+POST   /api/auth/forgot-password        Send password reset email
+POST   /api/auth/reset-password/:token  Reset password with token
+GET    /api/auth/verify-email/:token    Verify email address
+GET    /api/auth/google                 Google OAuth redirect
+GET    /api/auth/google/callback        Google OAuth callback
 ```
 
 ### Jobs
 ```
-GET    /api/jobs                       List jobs (with eligibility filter)
-POST   /api/jobs                       Post new job (company)
-PUT    /api/jobs/:id                   Update job (company)
-DELETE /api/jobs/:id                   Delete job (company/admin)
-GET    /api/jobs/recommended           Personalized recommendations (student)
-GET    /api/jobs/:id/skill-gap         Skill gap analysis (student)
-GET    /api/jobs/company/mine          Company's own jobs
+GET    /api/jobs                        List jobs with eligibility filter and pagination
+POST   /api/jobs                        Post new job (company only)
+PUT    /api/jobs/:id                    Update job (company only)
+DELETE /api/jobs/:id                    Delete job (company or admin)
+GET    /api/jobs/recommended            AI-ranked recommendations for student
+GET    /api/jobs/:id/skill-gap          Skill gap analysis for student
+GET    /api/jobs/company/mine           Jobs posted by the current company
 ```
 
 ### Applications
 ```
-POST   /api/applications               Apply to job (student)
-GET    /api/applications/mine          Student's applications
-GET    /api/applications/job/:jobId    Applicants for a job (company)
-PATCH  /api/applications/:id/status   Update status (company/admin)
+POST   /api/applications                Apply to a job (student only)
+GET    /api/applications/mine           Student's own applications
+GET    /api/applications/job/:jobId     All applicants for a job (company)
+PATCH  /api/applications/:id/status     Update status — triggers email + WhatsApp
 ```
 
-### AI
+### AI Service
 ```
-POST   /api/ai/shortlist/:jobId        Rank candidates with AI
-GET    /api/ai/health                  AI service health check
+POST   /api/ai/shortlist/:jobId         Rank all candidates with ML (fallback if down)
+GET    /api/ai/health                   AI service health check
 ```
 
 ### Interviews
 ```
-POST   /api/interviews                 Schedule interview (company)
-GET    /api/interviews/student         Student's interviews
-GET    /api/interviews/company         Company's interviews
-PATCH  /api/interviews/:id             Update interview status
+POST   /api/interviews                  Schedule interview (company only)
+GET    /api/interviews/student          Student's scheduled interviews
+GET    /api/interviews/company          Company's scheduled interviews
+PATCH  /api/interviews/:id              Update status or add feedback
 ```
 
 ### Admin
 ```
-GET    /api/admin/analytics            Placement analytics
-GET    /api/admin/users                All users with filters
-GET    /api/admin/activity-logs        Audit trail
-GET    /api/admin/export/applications.csv    Export data
-GET    /api/admin/export/activity-logs.csv   Export logs
-PATCH  /api/admin/users/:id/toggle     Activate/deactivate user
+GET    /api/admin/analytics             Full placement analytics with aggregations
+GET    /api/admin/users                 All users with role filter and search
+GET    /api/admin/activity-logs         Full audit trail with pagination
+GET    /api/admin/export/applications.csv   Export all application data
+GET    /api/admin/export/activity-logs.csv  Export audit logs
+PATCH  /api/admin/users/:id/toggle      Activate or deactivate user
 ```
 
 ---
@@ -362,102 +388,106 @@ cd backend
 npm test
 ```
 
-Tests cover:
-- Auth: register, login, JWT validation, role checks
-- Jobs: CRUD, eligibility filtering, recommendations  
-- Applications: apply, duplicate prevention, CGPA check, status updates
+Tests cover auth (register, login, JWT validation, role checks), jobs (CRUD, eligibility filtering), and applications (apply, duplicate prevention, CGPA check, status updates). 30+ integration tests using Jest and Supertest.
 
 ---
 
 ## 🚀 Deployment
 
-### Frontend → Vercel
-1. Import GitHub repo on [vercel.com](https://vercel.com)
-2. Root directory: `frontend`
-3. Build command: `npm run build`
-4. Add env: `VITE_API_URL=https://your-backend.onrender.com/api`
+The project is deployed across three platforms:
 
-### Backend → Render
-1. New Web Service on [render.com](https://render.com)
-2. Root directory: `backend`
-3. Start command: `node server.js`
-4. Add all env variables from `.env`
+| Service | Platform | URL |
+|---|---|---|
+| Frontend | Vercel | Auto-deploys on push to main |
+| Backend | Render | Auto-deploys on push to main |
+| AI Service | Render | Auto-deploys on push to main |
+| Database | MongoDB Atlas | Cloud hosted |
+| File Storage | Supabase | Cloud CDN |
 
-### AI Service → Render
-1. New Web Service
-2. Root directory: `ai-service`
-3. Build: `pip install -r requirements.txt && python model/train.py`
-4. Start: `uvicorn main:app --host 0.0.0.0 --port 8000`
+### Deploy Frontend on Vercel
+
+1. Import GitHub repo on vercel.com
+2. Set Root Directory to `frontend`
+3. Set Build Command to `npm run build`
+4. Add environment variable `VITE_API_URL` pointing to your Render backend URL
+5. Deploy
+
+### Deploy Backend on Render
+
+1. New Web Service — connect GitHub repo
+2. Set Root Directory to `backend`
+3. Build Command: `npm install`
+4. Start Command: `node server.js`
+5. Add all environment variables from `.env`
+
+### Deploy AI Service on Render
+
+1. New Web Service — same GitHub repo
+2. Set Root Directory to `ai-service`
+3. Build Command: `pip install -r requirements.txt && python model/train.py`
+4. Start Command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
 
 ---
 
 ## 📁 Project Structure
 
 ```
-placeit/
-├── frontend/                    # React + Vite
+PlaceIT/
+├── frontend/                     React + Vite frontend
 │   └── src/
-│       ├── api/                 # Axios API functions
-│       ├── components/          # Navbar, common components
-│       ├── context/             # Auth, Socket, Theme contexts
+│       ├── api/                  Axios API functions and bookmark utilities
+│       ├── components/           Navbar, ErrorBoundary, Pagination, common UI
+│       ├── context/              Auth, Socket, Theme contexts
 │       └── pages/
-│           ├── student/         # Dashboard, Jobs, Applications, Profile, SkillGap
-│           ├── company/         # Dashboard, PostJob, Applicants, Interviews
-│           └── admin/           # Dashboard, Approvals, Analytics, Users
+│           ├── student/          Dashboard, Jobs, Calendar, SavedJobs,
+│           │                     Applications, Profile, SkillGap
+│           ├── company/          Dashboard (analytics), PostJob,
+│           │                     Applicants, Interviews
+│           └── admin/            Dashboard, Approvals, Analytics, Users
 │
-├── backend/                     # Node.js + Express
-│   ├── config/                  # MongoDB connection
-│   ├── models/                  # User, Job, Application, Interview, ActivityLog
-│   ├── routes/                  # auth, jobs, applications, ai, interviews, admin
-│   ├── middleware/               # JWT auth, error handler, file upload
-│   ├── services/                # Email, AI caller
-│   ├── utils/                   # Activity logger, seed data
-│   └── tests/                   # Jest integration tests
+├── backend/                      Node.js + Express API
+│   ├── config/                   MongoDB connection, Passport OAuth config
+│   ├── models/                   User, Job, Application, Interview, ActivityLog
+│   ├── routes/                   auth, jobs, applications, ai, interviews,
+│   │                             admin, oauth
+│   ├── middleware/               JWT auth, error handler, Supabase upload
+│   ├── services/                 Email (Nodemailer), AI caller, WhatsApp (Twilio)
+│   ├── utils/                    Activity logger, seed data
+│   └── tests/                    Jest + Supertest integration tests
 │
-├── ai-service/                  # Python FastAPI
-│   ├── main.py                  # API endpoints
-│   ├── scorer.py                # TF-IDF + ML ranking
-│   ├── resume_parser.py         # PDF/DOCX text extraction
-│   └── model/train.py           # ML model training
+├── ai-service/                   Python FastAPI ML service
+│   ├── main.py                   API endpoints
+│   ├── scorer.py                 TF-IDF + ML scoring with fallback
+│   ├── resume_parser.py          PDF/DOCX text extraction
+│   └── model/train.py            Gradient Boosting model training
 │
-├── docker-compose.yml           # Multi-service container setup
-└── .github/workflows/ci.yml     # GitHub Actions CI/CD
+├── docker-compose.yml            Multi-service container setup
+└── .github/workflows/ci.yml      GitHub Actions CI/CD pipeline
 ```
 
 ---
 
 ## 🔒 Security
 
-- JWT authentication with configurable expiry
-- Passwords hashed with bcryptjs (12 salt rounds)
-- Rate limiting on auth routes (20 req/15min in production)
-- HTTP security headers via Helmet
-- NoSQL injection prevention via mongo-sanitize
-- Input validation on all API endpoints
-- Role-based access control on every protected route
-
----
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create your feature branch: `git checkout -b feature/amazing-feature`
-3. Commit changes: `git commit -m 'feat: add amazing feature'`
-4. Push: `git push origin feature/amazing-feature`
-5. Open a Pull Request
+- Passwords hashed with bcryptjs using 12 salt rounds — never stored in plain text
+- JWT tokens with configurable expiry — access tokens stored in localStorage
+- Password reset via time-limited cryptographic tokens (1 hour expiry)
+- Email verification required before admin approval — prevents fake accounts
+- Google OAuth via Passport.js — secure third-party authentication
+- Rate limiting on authentication routes — 20 requests per 15 minutes in production
+- HTTP security headers via Helmet — prevents XSS, clickjacking, MIME sniffing
+- MongoDB query sanitization via mongo-sanitize — prevents NoSQL injection
+- Role-based access control enforced on every protected API route
+- React Error Boundaries — prevents white screen crashes from component errors
 
 ---
 
 ## 📄 License
 
-MIT License — see [LICENSE](LICENSE) for details.
+MIT License. See [LICENSE](LICENSE) for details.
 
 ---
 
-<div align="center">
-
-Built with ❤️ by [Shikha Gupta](https://github.com/Shikhha09)
+Built with care by [Shikha](https://github.com/Shikhha09)
 
 ⭐ Star this repo if you found it helpful!
-
-</div>
