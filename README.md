@@ -18,7 +18,7 @@
 |---|---|---|
 | ![Analytics](docs/analytics.png) | ![Calendar](docs/calendar.png) | ![Company](docs/company-dashboard.png) |
 
-> **Live Demo:** [placeit-ai-powered-campus-placemen.vercel.app](https://placeit-ai-powered-campus-placemen.vercel.app)
+> **Live Demo:** [placeit-ai-powered-campus-placemen.vercel.app](https://place-it-ai-powered-campus-placemen.vercel.app/)
 > Use one-click demo buttons on the login page to explore all three roles instantly.
 
 ---
