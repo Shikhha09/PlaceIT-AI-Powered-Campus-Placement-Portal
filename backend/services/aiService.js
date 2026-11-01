@@ -1,15 +1,20 @@
 const axios = require("axios");
+const { skillKey } = require("../utils/skills");
 
 const AI_BASE = process.env.AI_SERVICE_URL || "http://localhost:8000";
+
+// Shared secret so only this backend can call the FastAPI service.
+const aiHeaders = () =>
+  process.env.AI_SERVICE_API_KEY ? { "X-Internal-Key": process.env.AI_SERVICE_API_KEY } : {};
 
 // Fallback scorer when AI service is down
 // Ranks by CGPA + skill overlap — simple but fair
 const fallbackRank = (candidates, job) => {
-  const requiredSkills = (job.requiredSkills || []).map((s) => s.toLowerCase());
+  const requiredSkills = (job.requiredSkills || []).map(skillKey);
 
   return candidates
     .map((c) => {
-      const studentSkills = (c.skills || []).map((s) => s.toLowerCase());
+      const studentSkills = (c.skills || []).map(skillKey);
       const matched = requiredSkills.filter((s) => studentSkills.includes(s));
       const skillScore = requiredSkills.length
         ? Math.round((matched.length / requiredSkills.length) * 100)
@@ -39,7 +44,7 @@ const shortlistCandidates = async (candidates, job) => {
     const response = await axios.post(
       `${AI_BASE}/shortlist`,
       { candidates, job },
-      { timeout: 30000 }
+      { timeout: 30000, headers: aiHeaders() }
     );
     return { ranked: response.data.ranked, usedFallback: false };
   } catch (err) {
@@ -61,4 +66,4 @@ const checkAIHealth = async () => {
   }
 };
 
-module.exports = { shortlistCandidates, checkAIHealth };
+module.exports = { shortlistCandidates, checkAIHealth, aiHeaders, AI_BASE };

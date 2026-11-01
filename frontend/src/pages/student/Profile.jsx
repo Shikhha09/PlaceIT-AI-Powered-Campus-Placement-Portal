@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useAuth } from "../../context/AuthContext";
-import { authAPI } from "../../api";
+import { authAPI, aiAPI } from "../../api";
 import Navbar from "../../components/Navbar";
 import toast from "react-hot-toast";
-import { Upload, ExternalLink } from "lucide-react";
+import { Upload, ExternalLink, Sparkles } from "lucide-react";
 
 const BRANCHES = ["CSE","IT","ECE","EEE","MECH","CIVIL","CHEM","OTHER"];
 
@@ -12,7 +12,9 @@ export default function StudentProfile() {
   const { user, login } = useAuth();
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const { register, handleSubmit } = useForm({
+  const [suggesting, setSuggesting] = useState(false);
+  const [suggestions, setSuggestions] = useState(null); // null = not asked yet
+  const { register, handleSubmit, getValues, setValue } = useForm({
     defaultValues: {
       name: user?.name, branch: user?.branch, cgpa: user?.cgpa,
       graduationYear: user?.graduationYear,
@@ -39,6 +41,33 @@ export default function StudentProfile() {
     } finally {
       setSaving(false);
     }
+  };
+
+  // AI: suggest skills from the parsed resume. Nothing is saved automatically -
+  // the student adds the ones she agrees with, then presses "Save Changes".
+  const handleSuggestSkills = async () => {
+    if (suggesting) return;
+    setSuggesting(true);
+    try {
+      const res = await aiAPI.suggestSkills();
+      setSuggestions(res.data.suggestions);
+      if (!res.data.suggestions.length) toast("No skills could be confirmed from your resume text.");
+    } catch (err) {
+      toast.error(err.response?.data?.error || "Couldn't suggest skills right now.");
+    } finally {
+      setSuggesting(false);
+    }
+  };
+
+  const currentSkills = () =>
+    (getValues("skills") || "").split(",").map((s) => s.trim()).filter(Boolean);
+
+  const addSkills = (names) => {
+    const have = new Set(currentSkills().map((s) => s.toLowerCase()));
+    const toAdd = names.filter((n) => !have.has(n.toLowerCase()));
+    if (!toAdd.length) return;
+    setValue("skills", [...currentSkills(), ...toAdd].join(", "), { shouldDirty: true });
+    toast.success(`Added ${toAdd.length} skill${toAdd.length > 1 ? "s" : ""} — press Save Changes to keep them.`);
   };
 
   const handleResumeUpload = async (e) => {
@@ -109,6 +138,51 @@ export default function StudentProfile() {
             </div>
           )}
         </div>
+
+        {/* AI skill suggestions */}
+        {user?.resumeText && (
+          <div className="card mb-6">
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <div>
+                <h2 className="font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-2">
+                  <Sparkles size={16} className="text-primary-600" /> Suggest skills from my resume
+                </h2>
+                <p className="text-xs text-gray-400 mt-1">
+                  AI reads your resume text and proposes skills, each backed by a line from your resume. Nothing is saved until you add it and press Save Changes.
+                </p>
+              </div>
+              <button type="button" onClick={handleSuggestSkills} disabled={suggesting}
+                className="btn-secondary text-sm disabled:opacity-60">
+                {suggesting ? "Reading resume..." : "Suggest skills"}
+              </button>
+            </div>
+
+            {suggestions?.length > 0 && (
+              <div className="mt-4">
+                <div className="flex flex-wrap gap-2">
+                  {suggestions.map((s) => (
+                    <button key={s.name} type="button" title={`From your resume: "${s.evidence}"`}
+                      disabled={s.alreadyInProfile}
+                      onClick={() => addSkills([s.name])}
+                      className={`text-sm px-3 py-1 rounded-full border ${
+                        s.alreadyInProfile
+                          ? "bg-green-50 text-green-700 border-green-200 cursor-default"
+                          : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border-gray-300 hover:bg-primary-50"
+                      }`}>
+                      {s.alreadyInProfile ? "✓ " : "+ "}{s.name}
+                    </button>
+                  ))}
+                </div>
+                {suggestions.some((s) => !s.alreadyInProfile) && (
+                  <button type="button" className="text-xs text-primary-600 mt-3 hover:underline"
+                    onClick={() => addSkills(suggestions.filter((s) => !s.alreadyInProfile).map((s) => s.name))}>
+                    Add all new skills
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Profile form */}
         <div className="card">

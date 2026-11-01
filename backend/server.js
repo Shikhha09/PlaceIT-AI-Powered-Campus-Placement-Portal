@@ -9,6 +9,8 @@ const mongoSanitize = require("express-mongo-sanitize");
 const rateLimit = require("express-rate-limit");
 const morgan = require("morgan");
 const { Server } = require("socket.io");
+const jwt = require("jsonwebtoken");
+const User = require("./models/User");
 
 const connectDB = require("./config/db");
 const { errorHandler, notFound } = require("./middleware/errorHandler");
@@ -37,12 +39,26 @@ const io = new Server(server, {
   },
 });
 
+// Authenticate every socket with the same JWT the REST API uses. Previously any
+// client could emit "join" with someone else's userId and read their notifications.
+io.use(async (socket, next) => {
+  try {
+    const token = socket.handshake.auth?.token;
+    if (!token) return next(new Error("Authentication required"));
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id).select("_id isActive isApproved");
+    if (!user || !user.isActive || !user.isApproved) return next(new Error("Not authorized"));
+    socket.userId = String(user._id);
+    next();
+  } catch {
+    next(new Error("Authentication failed"));
+  }
+});
+
 io.on("connection", (socket) => {
-  // Each user joins their own room using their userId
-  socket.on("join", (userId) => {
-    socket.join(userId);
-    console.log(`Socket: User ${userId} joined room`);
-  });
+  // The server decides the room (from the verified token); client-supplied ids are ignored.
+  socket.join(socket.userId);
+  socket.on("join", () => {}); // legacy event from older frontends - intentionally a no-op
 
   socket.on("disconnect", () => {
     console.log("Socket: Client disconnected");

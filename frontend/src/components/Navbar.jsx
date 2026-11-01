@@ -12,6 +12,7 @@ const navLinks = {
     { to: "/student/calendar",     label: "Calendar" },
     { to: "/student/saved",        label: "Saved" },
     { to: "/student/applications", label: "My Applications" },
+    { to: "/student/copilot",      label: "AI Copilot" },
     { to: "/student/profile",      label: "Profile" },
   ],
   company: [

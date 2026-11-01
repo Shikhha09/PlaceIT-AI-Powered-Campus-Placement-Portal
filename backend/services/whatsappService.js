@@ -1,11 +1,12 @@
 // WhatsApp notifications via Twilio
 // Falls back gracefully if Twilio is not configured
+const { isRealValue } = require("../utils/envCheck");
 
 const isConfigured =
-  process.env.TWILIO_ACCOUNT_SID &&
-  process.env.TWILIO_AUTH_TOKEN &&
-  process.env.TWILIO_WHATSAPP_FROM &&
-  process.env.TWILIO_ACCOUNT_SID !== "your_twilio_sid";
+  isRealValue(process.env.TWILIO_ACCOUNT_SID) &&
+  process.env.TWILIO_ACCOUNT_SID.startsWith("AC") && // real Twilio SIDs always start with AC
+  isRealValue(process.env.TWILIO_AUTH_TOKEN) &&
+  isRealValue(process.env.TWILIO_WHATSAPP_FROM);
 
 let twilioClient;
 if (isConfigured) {

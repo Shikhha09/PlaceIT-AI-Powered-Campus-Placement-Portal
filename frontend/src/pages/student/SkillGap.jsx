@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { jobsAPI } from "../../api";
 import Navbar from "../../components/Navbar";
 import { ScoreBar, Spinner } from "../../components/common";
+import CareerCopilot from "../../components/CareerCopilot";
 import { CheckCircle, XCircle, ArrowLeft } from "lucide-react";
 
 export default function SkillGap() {
@@ -104,6 +105,8 @@ export default function SkillGap() {
             <p className="text-xs text-gray-400 mt-2">Click any skill to find learning resources.</p>
           )}
         </div>
+
+        <CareerCopilot jobId={jobId} jobTitle={job.title} variant="embedded" />
 
         {analysis.overallEligible && (
           <Link to="/student/jobs" className="btn-primary w-full text-center block">

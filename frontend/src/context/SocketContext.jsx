@@ -15,9 +15,9 @@ export const SocketProvider = ({ children }) => {
 
     socketRef.current = io(import.meta.env.VITE_API_URL?.replace("/api", "") || "http://localhost:5000", {
       transports: ["websocket"],
+      // The server verifies this JWT and puts the socket in the user's own room.
+      auth: { token: localStorage.getItem("token") },
     });
-
-    socketRef.current.emit("join", user._id || user.id);
 
     socketRef.current.on("notification", (data) => {
       setNotifications((prev) => [{ ...data, id: Date.now(), read: false }, ...prev]);

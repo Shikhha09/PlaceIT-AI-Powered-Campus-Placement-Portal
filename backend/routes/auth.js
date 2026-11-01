@@ -173,7 +173,7 @@ router.patch("/student-resume", protect, authorize("student"), upload.single("re
     const parseRes = await axios.post(
       `${process.env.AI_SERVICE_URL || "http://localhost:8000"}/parse-resume`,
       { fileUrl: cloudResult.secure_url, fileType: req.file.mimetype },
-      { timeout: 20000 }
+      { timeout: 20000, headers: require("../services/aiService").aiHeaders() }
     );
     resumeText = parseRes.data.text || "";
   } catch {

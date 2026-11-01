@@ -5,6 +5,8 @@ const Application = require("../models/Application");
 const User = require("../models/User");
 const { protect, authorize } = require("../middleware/auth");
 const { log } = require("../utils/activityLogger");
+const { computeSkillGap } = require("../utils/skills");
+const { computeEligibility } = require("../utils/eligibility");
 
 // ─── GET /api/jobs — Browse all active jobs (with filters + pagination) ───────
 router.get("/", protect, async (req, res) => {
@@ -96,15 +98,11 @@ router.get("/:id/skill-gap", protect, authorize("student"), async (req, res) => 
   if (!job) return res.status(404).json({ error: "Job not found." });
 
   const student = await User.findById(req.user._id);
-  const studentSkills = (student.skills || []).map((s) => s.toLowerCase());
-  const requiredSkills = job.requiredSkills.map((s) => s.toLowerCase());
+  // Shared with the AI Career Copilot so both always agree on matched/missing skills.
+  const { matchedSkills: matched, missingSkills: missing, matchPercentage } =
+    computeSkillGap(student.skills, job.requiredSkills);
 
-  const matched = requiredSkills.filter((s) => studentSkills.includes(s));
-  const missing = requiredSkills.filter((s) => !studentSkills.includes(s));
-  const matchPercentage = Math.round((matched.length / requiredSkills.length) * 100);
-
-  const cgpaEligible = (student.cgpa || 0) >= job.minCGPA;
-  const branchEligible = job.allowedBranches.includes("ALL") || job.allowedBranches.includes(student.branch);
+  const { cgpaEligible, branchEligible, overallEligible } = computeEligibility(student, job);
 
   res.json({
     job: { title: job.title, requiredSkills: job.requiredSkills, minCGPA: job.minCGPA },
@@ -115,7 +113,7 @@ router.get("/:id/skill-gap", protect, authorize("student"), async (req, res) => 
       missingSkills: missing,
       cgpaEligible,
       branchEligible,
-      overallEligible: cgpaEligible && branchEligible,
+      overallEligible,
     },
   });
 });

@@ -6,6 +6,8 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.preprocessing import MinMaxScaler
 
+from skill_utils import skill_set
+
 # Try to load trained model, fall back to rule-based scoring
 MODEL_PATH = os.path.join(os.path.dirname(__file__), "model", "placement_model.pkl")
 
@@ -35,8 +37,9 @@ def skill_match_score(resume_text: str, skills: list, job_description: str, requ
             tfidf_score = 0.0
 
     # Keyword overlap score
-    student_skills_lower = {s.lower() for s in skills}
-    required_skills_lower = {s.lower() for s in required_skills}
+    # skill_set folds "ReactJS" / "React.js" / "react" into the same key
+    student_skills_lower = skill_set(skills)
+    required_skills_lower = skill_set(required_skills)
     if required_skills_lower:
         overlap = len(student_skills_lower & required_skills_lower)
         keyword_score = overlap / len(required_skills_lower)
