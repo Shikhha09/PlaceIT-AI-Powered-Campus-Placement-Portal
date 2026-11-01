@@ -9,10 +9,20 @@ async def parse_resume_from_url(file_url: str, file_type: str) -> str:
     Downloads a resume from Cloudinary URL and extracts plain text.
     Supports PDF, DOCX, and TXT.
     """
-    async with httpx.AsyncClient(timeout=20.0) as client:
-        response = await client.get(file_url)
-        response.raise_for_status()
-        content = response.content
+    # follow_redirects=False: a redirect could bounce us to an internal address
+    # after the host allow-list check. Stream with a size cap so a huge file
+    # can't exhaust memory.
+    max_bytes = 6 * 1024 * 1024
+    async with httpx.AsyncClient(timeout=20.0, follow_redirects=False) as client:
+        async with client.stream("GET", file_url) as response:
+            response.raise_for_status()
+            chunks, size = [], 0
+            async for chunk in response.aiter_bytes():
+                size += len(chunk)
+                if size > max_bytes:
+                    raise ValueError("Resume file is too large.")
+                chunks.append(chunk)
+            content = b"".join(chunks)
 
     if "pdf" in file_type.lower():
         return extract_pdf_text(content)

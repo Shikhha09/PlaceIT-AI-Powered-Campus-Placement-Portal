@@ -18,6 +18,7 @@ import StudentJobs from "./pages/student/Jobs";
 import StudentApplications from "./pages/student/Applications";
 import StudentProfile from "./pages/student/Profile";
 import SkillGap from "./pages/student/SkillGap";
+import CopilotPage from "./pages/student/CopilotPage";
 import PlacementCalendar from "./pages/student/Calendar";
 import SavedJobs from "./pages/student/SavedJobs";
 
@@ -63,6 +64,7 @@ export default function App() {
         <Route path="/student/applications" element={<StudentApplications />} />
         <Route path="/student/profile" element={<StudentProfile />} />
         <Route path="/student/skill-gap/:jobId" element={<SkillGap />} />
+        <Route path="/student/copilot" element={<CopilotPage />} />
         <Route path="/student/calendar" element={<PlacementCalendar />} />
         <Route path="/student/saved" element={<SavedJobs />} />
       </Route>

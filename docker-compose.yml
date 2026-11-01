@@ -32,6 +32,7 @@ services:
       - JWT_SECRET=${JWT_SECRET:-supersecretchangeme}
       - JWT_EXPIRE=7d
       - AI_SERVICE_URL=http://ai-service:8000
+      - AI_SERVICE_API_KEY=${AI_SERVICE_API_KEY:-dev-only-change-me}
       - CLIENT_URL=http://localhost:5173
       - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
       - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
@@ -59,6 +60,11 @@ services:
     restart: unless-stopped
     ports:
       - "8000:8000"
+    environment:
+      - AI_SERVICE_API_KEY=${AI_SERVICE_API_KEY:-dev-only-change-me}
+      - LLM_PROVIDER=gemini
+      - LLM_API_KEY=${LLM_API_KEY:-}
+      - LLM_MODEL=${LLM_MODEL:-gemini-3.8-flash}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 15s

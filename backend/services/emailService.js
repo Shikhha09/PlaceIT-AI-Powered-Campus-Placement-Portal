@@ -1,14 +1,10 @@
 const nodemailer = require("nodemailer");
+const { isRealValue } = require("../utils/envCheck");
 
-const isEmailConfigured = () => {
-  return (
-    process.env.MAIL_HOST &&
-    process.env.MAIL_USER &&
-    process.env.MAIL_PASS &&
-    process.env.MAIL_USER !== "your_mailtrap_user" &&
-    process.env.MAIL_PASS !== "your_mailtrap_pass"
-  );
-};
+const isEmailConfigured = () =>
+  isRealValue(process.env.MAIL_HOST) &&
+  isRealValue(process.env.MAIL_USER) &&
+  isRealValue(process.env.MAIL_PASS);
 
 const getTransporter = () => {
   if (!isEmailConfigured()) return null;

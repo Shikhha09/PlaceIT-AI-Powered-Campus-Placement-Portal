@@ -2,13 +2,14 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 const { createClient } = require("@supabase/supabase-js");
+const { isRealValue } = require("../utils/envCheck");
  
 // ── Determine storage strategy ────────────────────────────────────────────────
 // Priority: Supabase → Local disk fallback
 const useSupabase =
-  process.env.SUPABASE_URL &&
-  process.env.SUPABASE_KEY &&
-  process.env.SUPABASE_URL !== "your_supabase_url";
+  isRealValue(process.env.SUPABASE_URL) &&
+  isRealValue(process.env.SUPABASE_KEY) &&
+  process.env.SUPABASE_URL.startsWith("https://");
  
 let supabase;
  

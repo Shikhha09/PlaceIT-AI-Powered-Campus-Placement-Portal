@@ -110,6 +110,84 @@ Most college placement cells still run on **Excel sheets, WhatsApp groups, and p
 
 ---
 
+## 🤖 AI Career Copilot (LLM features)
+
+PlaceIT has two AI layers that are deliberately kept separate:
+
+| Layer | What it does | Where |
+|---|---|---|
+| **Ranking (classic ML)** | TF-IDF + skill overlap + CGPA + a Gradient Boosting signal rank applicants for companies | `ai-service/scorer.py` |
+| **Career Copilot (LLM)** | Helps *students* prepare: study plans, interview questions, skill suggestions from their resume | `ai-service/copilot.py`, `backend/routes/ai.js` |
+
+**The LLM never decides eligibility, scores or rankings.** Matched/missing skills are computed
+deterministically by the backend (`backend/utils/skills.js`) and handed to the model as facts.
+
+### Features
+- **Conversational chat** (full page at **AI Copilot** in the nav, and embedded on the Skill Gap page): type any question and ask follow-ups. General technical questions get general answers; placement questions use real PlaceIT data. Details below.
+- **Study plan (7 or 14 days)** and **interview questions** on the Skill Gap page, built around the student's verified gaps for that job.
+- **Suggest skills from my resume** on the Profile page. Each suggestion must quote a line from the resume; nothing is saved until the student adds it and clicks *Save Changes*.
+- **Skill normalisation**: `ReactJS`, `React.js` and `react` now count as the same skill in skill-gap, fallback ranking and the ML scorer.
+
+### Request flow
+```
+React ──JWT──▶ Express (auth, role check, zod validation, per-user rate limit,
+                        deterministic skill gap) ──X-Internal-Key──▶ FastAPI
+                                                     (prompt build, LLM call, schema validation,
+                                                      grounding checks, link stripping)
+```
+The browser never talks to the LLM or to FastAPI, and no provider key exists in frontend code.
+
+### AI chat: how it works
+- **Endpoint:** `POST /api/ai/copilot/chat` (students only, JWT required, same per-user rate limits as the other Copilot calls).
+  ```jsonc
+  // request
+  { "message": "Explain it using my PlaceIT project",           // 1-2000 chars
+    "conversationHistory": [{ "role": "user"|"assistant", "content": "..." }],   // max 40 accepted, last 10 used
+    "jobId": "<optional job id>",
+    "contextMode": "general" | "personalized" }
+  // response
+  { "success": true, "reply": "...markdown...", "conversationId": null,
+    "timestamp": "ISO date", "contextUsed": ["profile", "job", "skill-gap"] }
+  ```
+  Unknown fields (for example `studentId`) are rejected with 400. Errors are `{ "error": "..." }` with friendly text only.
+- **Memory:** the browser keeps the transcript in React state and sends the most recent messages with every request. Nothing is stored on the server yet, so conversations are isolated per browser session; `conversationId` is reserved for MongoDB persistence later. The history is treated as **untrusted** (a user can edit it): it is size-capped, only `user`/`assistant` roles are accepted, and the model receives it as a quoted transcript, never as instructions.
+- **Personal data is fetched only when relevant.** `backend/services/chatContextService.js` decides from the message (or from the *Personalized answers* switch) which blocks to load: profile, selected job, skill match, eligibility, the student's own applications, open jobs, or a masked resume excerpt. A question like "What is RAG?" touches the database zero times. Every query is scoped to the JWT user, selects a fixed whitelist of fields (never email, phone, password or tokens), and the model cannot query anything itself.
+- **Eligibility and skill match come from PlaceIT rules** (`utils/eligibility.js`, `utils/skills.js`) and are given to the model as facts. If data isn't provided (an application status, a deadline), the system prompt tells the model to say it doesn't have it.
+- **Existing features stay:** the 7/14-day plan, interview-question and resume-skill buttons are quick actions above the chat, and their results appear as messages. A typed request such as "make a 7-day plan for this job" is answered by the chat model using the same verified skill-gap facts.
+- **Safe rendering:** replies are rendered with `react-markdown` + `remark-gfm`: raw HTML is skipped, links are inert text, images are never loaded.
+- **Frontend tests:** `cd frontend && npm test` (Vitest + Testing Library).
+
+### Safety design
+- **Identity from the JWT only.** Bodies containing `studentId` or any unknown field are rejected (400).
+- **Prompt injection**: resume/job/user text is cleaned (invisible characters, fake closing tags), length-capped, fenced in tags and declared untrusted in the system prompt. Output is validated against a Pydantic schema, extracted skills must be quoted from the resume, links are stripped from model output, and suspicious inputs are flagged in the activity log.
+- **Service-to-service auth**: FastAPI requires `X-Internal-Key`; in production it refuses to start serving without one.
+- **SSRF guard**: `/parse-resume` only downloads from allow-listed storage hosts (Cloudinary, `*.supabase.co`), never follows redirects and caps file size.
+- **Authenticated sockets**: Socket.io now verifies the JWT; clients can no longer join another user's notification room.
+- **Cost & abuse controls**: per-student limits (`COPILOT_RATE_PER_MIN`, `COPILOT_DAILY_CAP`), request size limits, provider timeout, graceful "AI unavailable" message.
+- **Privacy**: logs hold task, latency, token counts and flags only, never resumes, prompts or answers.
+
+### Setup
+1. `cp backend/.env.example backend/.env` and `cp ai-service/.env.example ai-service/.env`
+2. Create a Gemini API key in Google AI Studio and set `LLM_API_KEY` in `ai-service/.env`.
+3. Set the **same** random `AI_SERVICE_API_KEY` in both `.env` files.
+4. Run the AI service and backend as usual. Without `LLM_API_KEY` the Copilot buttons show a friendly "unavailable" message and everything else keeps working.
+
+### Tests and evaluation
+```bash
+cd ai-service && pip install -r requirements-dev.txt && pytest -q     # fake LLM, no key needed
+cd backend && npm test                                               # Copilot route tests need no database
+cd ai-service && LLM_API_KEY=... python eval/run_eval.py             # real LLM: precision/recall vs keyword baseline, latency, tokens
+```
+Add ~25 real, anonymised resumes to `ai-service/eval/cases.json` before quoting any number from the eval.
+
+### Known limitations
+- The Gradient Boosting model in `ai-service/model/train.py` is trained on **synthetic** data whose labels come from a formula, so its accuracy figure measures how well it reproduces that formula, not real placement outcomes. Treat it as a demo signal until trained on real historical data.
+- Only Gemini is implemented (the provider is one small class in `ai-service/llm.py`).
+- Chat history is not persisted (browser memory only) and replies are not streamed, so answers appear all at once after a few seconds.
+- Chat decides which PlaceIT data to load with keyword rules, not model-driven tool calling, so an unusual phrasing may not trigger a lookup (the model then says it lacks the data). The *Personalized answers* switch forces profile/job context.
+- RAG over a placement knowledge base is planned, not built: the assistant's general-knowledge answers come from the model itself.
+- Free-tier Gemini quotas are small; each chat message is one model call.
+
 ## 🛠️ Tech Stack
 
 ### Frontend
@@ -359,6 +437,10 @@ PATCH  /api/applications/:id/status     Update status — triggers email + Whats
 ```
 POST   /api/ai/shortlist/:jobId         Rank all candidates with ML (fallback if down)
 GET    /api/ai/health                   AI service health check
+POST   /api/ai/copilot/study-plan       Student: LLM study plan for a job {jobId, days: 7|14, focus?}
+POST   /api/ai/copilot/interview-questions  Student: LLM interview questions {jobId, count: 3-8}
+POST   /api/ai/copilot/extract-skills   Student: suggest skills from own resume (does not save)
+POST   /api/ai/copilot/chat             Student: free-text conversation {message, conversationHistory, jobId?, contextMode}
 ```
 
 ### Interviews

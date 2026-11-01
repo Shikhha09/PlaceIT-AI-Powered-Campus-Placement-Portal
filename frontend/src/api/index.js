@@ -50,6 +50,15 @@ export const interviewsAPI = {
 export const aiAPI = {
   shortlist: (jobId) => api.post(`/ai/shortlist/${jobId}`),
   health: () => api.get("/ai/health"),
+  // Career Copilot (LLM). The server derives the student from the JWT - never send a student id.
+  // LLM calls are slower than normal requests, so allow a longer timeout.
+  studyPlan: (jobId, days = 7, focus) =>
+    api.post("/ai/copilot/study-plan", { jobId, days, ...(focus ? { focus } : {}) }, { timeout: 60000 }),
+  interviewQuestions: (jobId, count = 5) =>
+    api.post("/ai/copilot/interview-questions", { jobId, count }, { timeout: 60000 }),
+  suggestSkills: () => api.post("/ai/copilot/extract-skills", {}, { timeout: 60000 }),
+  // Free-text chat. `signal` lets the UI cancel an in-flight request (new chat / leaving the page).
+  chat: (payload, signal) => api.post("/ai/copilot/chat", payload, { timeout: 60000, signal }),
 };
 
 // ── Admin ─────────────────────────────────────────────────────────────────────
